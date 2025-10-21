@@ -51,7 +51,7 @@ export default function Chat() {
         botResponse = chatData[0]?.generated_text || "عذراً، لم أتمكن من توليد رد.";
       } else {
         // Not a first aid question
-        botResponse = "عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي طارئ أو استشارة طبيب مختص للحالات الأخرى.";
+        botResponse = "عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي أو استشارة طبيب مختص للحالات الأخرى.";
       }
 
       setMessages(prev => [...prev, { text: botResponse, isUser: false }]);
