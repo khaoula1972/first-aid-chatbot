@@ -18,7 +18,7 @@ The First Aid Chatbot leverages natural language processing (NLP) techniques to 
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/your-username/first-aid-chatbot.git
+   git clone https://github.com/khaoula1972/first-aid-chatbot.git
    ```
 2. Navigate to the project directory and install dependencies:
 
