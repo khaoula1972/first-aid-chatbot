@@ -9,8 +9,11 @@ The First Aid Chatbot leverages natural language processing (NLP) techniques to 
 ## Features
 
 • Full Arabic language support
+
 • Automatic classification of first aid–related questions
+
 • Contextual and reliable emergency response suggestions
+
 • Responsive and user-friendly interface
 
 ## Installation and Setup
