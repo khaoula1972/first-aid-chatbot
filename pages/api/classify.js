@@ -1,48 +1,48 @@
-// API endpoint for classifying emergency types
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+  // Get API key from environment variables
+  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  
+  if (!apiKey) {
+    console.error('Hugging Face API key not configured');
+    return res.status(500).json({ error: 'Service configuration error' });
   }
 
   try {
-    const { message } = req.body;
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/imaneumabderahmane/Arabertv02-classifier-FA',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputs: query }),
+      }
+    );
 
-    if (!message) {
-      return res.status(400).json({ message: 'Message is required' });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Classifier API error:', response.status);
+      throw new Error(`Classification service error: ${response.status}`);
     }
 
-    // Simple keyword-based classification for common first aid scenarios
-    const messageLower = message.toLowerCase();
-    let category = 'general';
-    let confidence = 0.5;
-
-    if (messageLower.includes('bleed') || messageLower.includes('cut') || messageLower.includes('wound')) {
-      category = 'bleeding';
-      confidence = 0.85;
-    } else if (messageLower.includes('burn') || messageLower.includes('scald')) {
-      category = 'burn';
-      confidence = 0.85;
-    } else if (messageLower.includes('chok') || messageLower.includes('heimlich')) {
-      category = 'choking';
-      confidence = 0.85;
-    } else if (messageLower.includes('cpr') || messageLower.includes('cardiac') || messageLower.includes('heart attack')) {
-      category = 'cardiac';
-      confidence = 0.85;
-    } else if (messageLower.includes('fracture') || messageLower.includes('broke') || messageLower.includes('sprain')) {
-      category = 'fracture';
-      confidence = 0.85;
-    } else if (messageLower.includes('poison') || messageLower.includes('toxic')) {
-      category = 'poisoning';
-      confidence = 0.85;
-    }
-
-    res.status(200).json({
-      category,
-      confidence,
-      message: `Classified as: ${category}`
-    });
+    const data = await response.json();
+    res.status(200).json(data);
   } catch (error) {
-    console.error('Classification error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Classification error:', error.message);
+    res.status(500).json({ 
+      error: 'Classification service unavailable',
+      details: error.message 
+    });
   }
 }
