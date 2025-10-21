@@ -8,7 +8,7 @@ export default function Home() {
         <title>مساعد الإسعافات الأولية</title>
         <meta name="description" content="مساعد ذكي للإسعافات الأولية باللغة العربية" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.jpg" />
       </Head>
       <main>
         <Chat />
