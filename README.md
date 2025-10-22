@@ -1,6 +1,6 @@
 # First Aid Chatbot
 
-An intelligent Arabic-language first aid assistant built using **Hugging Face** models. The classification module was developed by **Imane Mabrouk**. This project aims to provide accessible, AI-driven guidance for medical emergencies in Arabic-speaking contexts.
+An intelligent Arabic-language first aid assistant built using **Hugging Face** models. The classification module was developed by (**Imane Mabrouk**)[https://huggingface.co/imaneumabderahmane/Arabertv02-classifier-FA). This project aims to provide accessible, AI-driven guidance for medical emergencies in Arabic-speaking contexts.
 
 ## Overview
 
