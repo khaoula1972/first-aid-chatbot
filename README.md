@@ -18,7 +18,7 @@ The First Aid Chatbot leverages natural language processing (NLP) techniques to 
 
 ## **Local Installation Guide (WSL Environment)**
 
-This project — **First Aid Chatbot** — is deployed and publicly accessible on Vercel at the following address:
+This project is deployed and publicly accessible on Vercel at the following address:
 [https://first-aid-chatbot.vercel.app/](https://first-aid-chatbot.vercel.app/)
 
 If you wish to run the application locally, you should **create an isolated development environment** under **WSL (Windows Subsystem for Linux)** to avoid dependency conflicts and ensure consistent configuration. Follow the steps below carefully.
