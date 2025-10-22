@@ -91,7 +91,7 @@ http://localhost:3000/
 You should now see the chatbot interface operating locally.
 
 <p align="center">
-  <img src="https://cdn.corenexis.com/view/6896269168" alt="Chatbot interface" width="600">
+  <img src="https://image2url.com/images/1761092101633-b362d7c5-9295-4fed-823d-674e331d06fa.png" alt="Chatbot interface" width="600">
 </p>
 
 ### **6. Notes on Environment Isolation**
