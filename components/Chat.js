@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 export default function Chat() {
   const [messages, setMessages] = useState([
-    { text: 'مرحباً! أنا مساعد الإسعافات الأولية. يمكنني مساعدتك في الاستفسارات الطبية الطارئة. كيف يمكنني مساعدتك اليوم؟', isUser: false }
+    {
+      text: 'مرحباً! أنا مساعد الإسعافات الأولية. يمكنني مساعدتك في الاستفسارات الطبية الطارئة. كيف يمكنني مساعدتك اليوم؟',
+      isUser: false
+    }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -25,7 +29,7 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      // Step 1: Classify the query
+      // Step 1: classify the query
       const classifyResponse = await fetch('/api/classify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,12 +37,21 @@ export default function Chat() {
       });
 
       const classification = await classifyResponse.json();
-      const isFirstAid = classification?.isFirstAid === true;
+      let isFirstAid = false;
+
+      if (classification?.isFirstAid !== undefined) {
+        isFirstAid = classification.isFirstAid;
+      } else if (Array.isArray(classification[0])) {
+        const scores = classification[0];
+        const label0 = scores.find(s => s.label === "LABEL_0")?.score || 0;
+        const label1 = scores.find(s => s.label === "LABEL_1")?.score || 0;
+        isFirstAid = label1 > label0;
+      }
 
       let botResponse;
 
       if (isFirstAid) {
-        // Step 2: Get LLM response from DeepSeek
+        // Step 2: get response from DeepSeek or HuggingFace model
         const chatResponse = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -46,19 +59,22 @@ export default function Chat() {
         });
 
         const chatData = await chatResponse.json();
-        botResponse = chatData.answer || 'عذراً، لم أتمكن من توليد رد.';
+        const answer = chatData?.answer || chatData?.[0]?.generated_text;
+        botResponse = answer?.replace(/\n/g, '\n\n') || "عذراً، لم أتمكن من توليد رد.";
       } else {
-        // Non–first aid case
-        botResponse = 'عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي أو استشارة طبيب مختص للحالات الأخرى.';
+        botResponse =
+          "عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي أو استشارة طبيب مختص للحالات الأخرى.";
       }
 
       setMessages(prev => [...prev, { text: botResponse, isUser: false }]);
     } catch (error) {
-      console.error(error);
-      setMessages(prev => [...prev, {
-        text: 'عذراً، حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.',
-        isUser: false,
-      }]);
+      setMessages(prev => [
+        ...prev,
+        {
+          text: "عذراً، حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.",
+          isUser: false
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -77,25 +93,26 @@ export default function Chat() {
         <h1>مساعد الإسعافات الأولية</h1>
         <p>أسألني عن أي استفسار طبي طارئ</p>
       </div>
-      
+
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.isUser ? 'user-message' : 'bot-message'}`}>
-            <div className="message-content">
-              {message.text}
+            <div className="message-content" dir="rtl">
+              <ReactMarkdown>{message.text}</ReactMarkdown>
             </div>
           </div>
         ))}
+
         {loading && (
           <div className="message bot-message">
-            <div className="message-content loading">
+            <div className="message-content" dir="rtl">
               جاري المعالجة...
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      
+
       <div className="chat-input">
         <div className="input-container">
           <input
@@ -161,8 +178,9 @@ export default function Chat() {
           max-width: 70%;
           padding: 12px 16px;
           border-radius: 18px;
-          line-height: 1.4;
+          line-height: 1.8;
           word-wrap: break-word;
+          font-family: 'Noto Naskh Arabic', 'Arial', sans-serif;
         }
 
         .user-message .message-content {
