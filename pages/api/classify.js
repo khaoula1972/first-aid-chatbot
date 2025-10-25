@@ -4,18 +4,10 @@ export default async function handler(req, res) {
   }
 
   const { query } = req.body;
+  if (!query) return res.status(400).json({ error: 'Query is required' });
 
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
-  }
-
-  // Get API key from environment variables
   const apiKey = process.env.HUGGINGFACE_API_KEY;
-  
-  if (!apiKey) {
-    console.error('Hugging Face API key not configured');
-    return res.status(500).json({ error: 'Service configuration error' });
-  }
+  if (!apiKey) return res.status(500).json({ error: 'Missing Hugging Face key' });
 
   try {
     const response = await fetch(
@@ -30,19 +22,15 @@ export default async function handler(req, res) {
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Classifier API error:', response.status);
-      throw new Error(`Classification service error: ${response.status}`);
-    }
-
     const data = await response.json();
-    res.status(200).json(data);
+
+    const label0 = data?.[0]?.find(d => d.label === 'LABEL_0')?.score || 0;
+    const label1 = data?.[0]?.find(d => d.label === 'LABEL_1')?.score || 0;
+    const isFirstAid = label1 > label0;
+
+    res.status(200).json({ isFirstAid, label0, label1 });
   } catch (error) {
     console.error('Classification error:', error.message);
-    res.status(500).json({ 
-      error: 'Classification service unavailable',
-      details: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 }
