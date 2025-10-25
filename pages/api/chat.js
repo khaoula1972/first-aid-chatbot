@@ -9,11 +9,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Query is required' });
   }
 
-  // Get API key from environment variables
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
-  
+  // Get OpenRouter API key from environment variables
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
   if (!apiKey) {
-    console.error('Hugging Face API key not configured');
+    console.error('OpenRouter API key not configured');
     return res.status(500).json({ error: 'Service configuration error' });
   }
 
@@ -24,38 +24,37 @@ export default async function handler(req, res) {
 
 الإجابة:`;
 
-    const response = await fetch(
-      'https://api-inference.huggingface.co/models/inceptionai/jais-adapted-7b-chat',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 500,
-            temperature: 0.7,
-            do_sample: true,
-            return_full_text: false
-          }
-        }),
-      }
-    );
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'deepseek/deepseek-chat',
+        messages: [
+          { role: 'system', content: 'أنت مساعد طبي متخصص في الإسعافات الأولية. قدم إجابات دقيقة ومختصرة باللغة العربية.' },
+          { role: 'user', content: query }
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('LLM API error:', response.status);
-      throw new Error(`LLM service error: ${response.status}`);
+      console.error('DeepSeek API error:', errorText);
+      throw new Error(`DeepSeek service error: ${response.status}`);
     }
 
     const data = await response.json();
-    res.status(200).json(data);
+    const answer = data.choices?.[0]?.message?.content || 'No response received.';
+    res.status(200).json({ answer });
+
   } catch (error) {
-    console.error('LLM error:', error.message);
+    console.error('DeepSeek error:', error.message);
     res.status(500).json({ 
-      error: 'LLM service unavailable',
+      error: 'DeepSeek service unavailable',
       details: error.message 
     });
   }
