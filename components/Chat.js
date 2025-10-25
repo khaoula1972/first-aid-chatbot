@@ -9,7 +9,7 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -25,40 +25,39 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      // First, classify the query
+      // Step 1: Classify the query
       const classifyResponse = await fetch('/api/classify', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userMessage }),
       });
 
       const classification = await classifyResponse.json();
+      const isFirstAid = classification?.isFirstAid === true;
 
       let botResponse;
-      if (classification && classification[0] && classification[0][1] > classification[0][0]) {
-        // It's a first aid question - get LLM response
+
+      if (isFirstAid) {
+        // Step 2: Get LLM response from DeepSeek
         const chatResponse = await fetch('/api/chat', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: userMessage }),
         });
 
         const chatData = await chatResponse.json();
-        botResponse = chatData[0]?.generated_text || "عذراً، لم أتمكن من توليد رد.";
+        botResponse = chatData.answer || 'عذراً، لم أتمكن من توليد رد.';
       } else {
-        // Not a first aid question
-        botResponse = "عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي أو استشارة طبيب مختص للحالات الأخرى.";
+        // Non–first aid case
+        botResponse = 'عذراً، أنا مساعد مخصص للإسعافات الأولية والاستفسارات الطبية الطارئة فقط. يرجى تقديم استفسار طبي أو استشارة طبيب مختص للحالات الأخرى.';
       }
 
       setMessages(prev => [...prev, { text: botResponse, isUser: false }]);
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        text: "عذراً، حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.", 
-        isUser: false 
+      console.error(error);
+      setMessages(prev => [...prev, {
+        text: 'عذراً، حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.',
+        isUser: false,
       }]);
     } finally {
       setLoading(false);
@@ -113,7 +112,7 @@ export default function Chat() {
           </button>
         </div>
         <div className="disclaimer">
-           هذا المساعد للأغراض الإرشادية فقط. في الحالات الطبية الطارئة، يرجى الاتصال بالطوارئ فوراً.
+          هذا المساعد للأغراض الإرشادية فقط. في الحالات الطبية الطارئة، يرجى الاتصال بالطوارئ فوراً.
         </div>
       </div>
 
